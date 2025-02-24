@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Moj Blog - Najnoviji članci i postovi na teme koje vas interesuju.">
     <meta name="author" content="Aleksej">
@@ -23,11 +24,9 @@
     <link href="https://cdn.jsdelivr.net/npm/lightbox2@2.11.3/dist/css/lightbox.min.css" rel="stylesheet">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
-
 </head>
 
-<body class="bg-cover bg-center text-white min-h-screen flex flex-col" style="background-image: url('{{ asset('images/background.jpg') }}');">
+<body class="bg-gray-900 bg-cover bg-center text-white min-h-screen flex flex-col" style="background-image: url('{{ asset('images/background.jpg') }}');">
 
 <!-- Navigacija -->
 <nav class="bg-gray-800 shadow-md">
@@ -40,14 +39,13 @@
 
             <!-- Search bar -->
             <form action="{{ route('home') }}" method="GET" class="flex items-center space-x-4">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Pretraži postove..." class="px-4 py-2 border border-gray-700 rounded-l-md bg-gray-800 text-white w-64" />
-                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700">Pretraga</button>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search posts..." class="px-4 py-2 border border-gray-700 rounded-l-md bg-gray-800 text-white w-64" />
+                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700">Search</button>
             </form>
 
-            <!-- Avatar i Dropdown -->
+            <!-- Avatar and Dropdown -->
             @auth
                 <div class="relative" x-data="{ open: false }">
-                    <!-- Avatar i dropdown -->
                     <a href="#" @click="open = !open" class="flex items-center">
                         <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="Avatar" class="w-10 h-10 rounded-full border-2 border-gray-300 cursor-pointer">
                     </a>
@@ -56,6 +54,9 @@
                         <div class="p-2">
                             <a href="{{ route('profile.edit') }}" class="block text-gray-700 hover:bg-indigo-600 hover:text-white px-4 py-2 rounded-md">
                                 Settings
+                            </a>
+                            <a href="{{ route('chat.index') }}" class="block text-gray-700 hover:bg-indigo-600 hover:text-white px-4 py-2 rounded-md">
+                                Conversations
                             </a>
                             <form action="{{ route('logout') }}" method="POST" class="block">
                                 @csrf
@@ -68,7 +69,7 @@
                 </div>
             @endauth
 
-            <!-- Dugmadi za login/register (ako korisnik nije prijavljen) -->
+            <!-- Login/Register buttons for guests -->
             <div class="flex items-center space-x-4">
                 @guest
                     <a href="{{ route('login.form') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition duration-300">
@@ -83,10 +84,8 @@
     </div>
 </nav>
 
-
-<!-- Glavni sadržaj -->
+<!-- Main Content -->
 <div class="w-full mt-8 px-4 flex-grow">
-    <!-- Jedna kolona za sadržaj -->
     <main>
         @yield('content')
     </main>
@@ -103,7 +102,8 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/lightbox2@2.11.3/dist/js/lightbox-plus-jquery.min.js"></script>
+<script src="{{ asset('/resources/js/app.js') }}"></script>
+@stack('scripts')
 </body>
-
 
 </html>

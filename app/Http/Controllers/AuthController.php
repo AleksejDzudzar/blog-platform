@@ -17,10 +17,13 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|email',
-            'password' => 'required',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'password' => 'required|string|min:6|confirmed',
+        ], [
+            'email.unique' => 'This email is already registered. Please use another one or log in.'
         ]);
+
 
         $user = User::create([
             'name' => $request->name,
@@ -88,7 +91,7 @@ class AuthController extends Controller
 
         $user->save();
 
-        return redirect()->route('profile.edit')->with('success', 'Profil uspešno ažuriran!');
+        return redirect()->route('profile.edit')->with('success', 'Profile successfully updated!');
     }
 
     public function logout()

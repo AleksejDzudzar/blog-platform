@@ -10,15 +10,32 @@ class MessageController extends Controller
 {
     public function index(User $user)
     {
-        // Prikupljanje svih poruka između trenutno prijavljenog korisnika i ciljanog korisnika
-        $messages = Message::where(function ($query) use ($user) {
-            $query->where('sender_id', auth()->id())->where('receiver_id', $user->id);
-        })->orWhere(function ($query) use ($user) {
-            $query->where('sender_id', $user->id)->where('receiver_id', auth()->id());
-        })->orderBy('created_at', 'asc')->get();
+        $authUserId = auth()->id();
 
-        // Vraćanje prikaza sa korisnikom i porukama
+        $messages = Message::where(function ($query) use ($authUserId, $user) {
+            $query->where('sender_id', $authUserId)
+                ->where('receiver_id', $user->id);
+        })
+            ->orWhere(function ($query) use ($authUserId, $user) {
+                $query->where('sender_id', $user->id)
+                    ->where('receiver_id', $authUserId);
+            })
+            ->orderBy('created_at', 'asc')
+            ->get();
+
         return view('chat.index', compact('user', 'messages'));
+    }
+    public function conversations()
+    {
+        $authUserId = auth()->id();
+
+        $users = User::whereHas('sentMessages', function ($query) use ($authUserId) {
+            $query->where('receiver_id', $authUserId);
+        })->orWhereHas('receivedMessages', function ($query) use ($authUserId) {
+            $query->where('sender_id', $authUserId);
+        })->distinct()->get();
+
+        return view('chat.conversations', compact('users'));
     }
 
 
@@ -29,15 +46,13 @@ class MessageController extends Controller
             'message' => 'required|string'
         ]);
 
-        $message = Message::create([
+        Message::create([
             'sender_id' => auth()->id(),
             'receiver_id' => $request->receiver_id,
             'message' => $request->message
         ]);
 
-        broadcast(new NewMessageEvent($message))->toOthers();
-
         return redirect()->back();
-
     }
+
 }

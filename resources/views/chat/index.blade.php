@@ -1,68 +1,34 @@
 @extends('layouts.app')
 
-@section('content')
-    <div class="max-w-3xl mx-auto bg-gray-900 p-6 rounded-lg shadow-md">
-        <div class="flex items-center space-x-4">
-            <h1 class="text-3xl font-bold text-gray-100">{{ $user->name }}</h1>
-            <img src="{{ asset('storage/' . ($user->avatar ?? 'default-avatar.png')) }}" alt="Avatar"
-                 class="w-10 h-10 rounded-full">
-        </div>
+@section('title', 'Chat sa ' . $user->name)
 
-        <!-- Chat Messages -->
-        <div id="chat-box" class="mt-6 bg-gray-800 p-4 rounded-lg overflow-auto space-y-4" style="max-height: 400px;">
-            @foreach ($messages as $message)
-                <div class="text-gray-300 mb-2">
-                    <strong>{{ $message->user->name }}:</strong> {{ $message->message }}
+@section('content')
+    <div class="max-w-4xl mx-auto bg-gray-900 text-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-xl font-bold mb-4">Chat sa {{ $user->name }}</h2>
+
+        <!-- Chat prozor -->
+        <div class="h-96 overflow-y-auto border border-gray-700 p-4 rounded-lg bg-gray-800">
+            @foreach($messages as $message)
+                <div class="mb-3">
+                    <div class="flex {{ $message->sender_id == auth()->id() ? 'justify-end' : 'justify-start' }}">
+                        <div class="p-3 rounded-lg max-w-xs {{ $message->sender_id == auth()->id() ? 'bg-indigo-600' : 'bg-gray-700' }}">
+                            <strong>{{ $message->sender_id == auth()->id() ? 'Ti' : $user->name }}:</strong>
+                            <p class="mt-1">{{ $message->message }}</p>
+                            <span class="block text-sm text-gray-400 mt-1">{{ $message->created_at->format('H:i') }}</span>
+                        </div>
+                    </div>
                 </div>
             @endforeach
         </div>
 
-        <!-- Chat Input -->
-        <div class="mt-4 flex items-center space-x-2">
-            <textarea id="chat-input" class="w-full p-2 bg-gray-700 text-gray-300 rounded-lg resize-none" rows="3" placeholder="Type a message..."></textarea>
-            <button id="send-message" class="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 focus:outline-none">Send</button>
-        </div>
+        <form action="{{ route('chat.send') }}" method="POST" class="mt-4">
+            @csrf
+            <input type="hidden" name="receiver_id" value="{{ $user->id }}">
+
+            <div class="flex">
+                <input type="text" name="message" class="w-full p-2 rounded-l-md bg-gray-700 text-white border border-gray-600 focus:outline-none" placeholder="Unesi poruku..." required>
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-r-md">Pošalji</button>
+            </div>
+        </form>
     </div>
 @endsection
-
-
-@push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="{{ asset('/resources/js/app.js') }}"></script> <!-- Laravel Echo removed here -->
-
-    <script>
-        document.getElementById('send-message').addEventListener('click', function() {
-            sendMessage();
-        });
-
-        // Send message when 'Enter' is pressed (without Shift)
-        document.getElementById('chat-input').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-
-        function sendMessage() {
-            let message = document.getElementById('chat-input').value;
-
-            if (message.trim()) {
-                axios.post('/chat/send', {
-                    message: message,
-                    user: {{ $user->id }} // Sending user data (not user_id)
-                }, {
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    }
-                }).then(function(response) {
-                    document.getElementById('chat-input').value = ''; // Clear the input field
-                    // Reload the page to display the new message
-                    window.location.reload();
-                }).catch(function(error) {
-                    console.error('Error sending message:', error);
-                    alert("There was an error sending the message. Please try again.");
-                });
-            }
-        }
-    </script>
-@endpush

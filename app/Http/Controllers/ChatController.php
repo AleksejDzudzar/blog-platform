@@ -28,7 +28,7 @@ class ChatController extends Controller
 
         $message = Message::create([
             'user_id' => Auth::id(),
-            'content' => $request->message, // Proveri da li je kolona u bazi `message`
+            'content' => $request->message,
         ]);
 
         // Emitujemo event da frontend primi novu poruku
