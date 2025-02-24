@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
 
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Models\Category;
 use App\Models\Tag;
@@ -18,7 +20,7 @@ class PostController extends Controller
     {
         $search = $request->input('search');
 
-        $posts = Post::query()
+        $posts = Post::with(['category', 'tags', 'images'])
             ->when($search, function ($query, $search) {
                 return $query->where('title', 'like', "%{$search}%")
                     ->orWhereHas('tags', function ($query) use ($search) {
@@ -30,14 +32,7 @@ class PostController extends Controller
             })
             ->paginate(10);
 
-        return view('home', compact('posts'));
-    }
-
-    public function create()
-    {
-        $categories = Category::all();
-        $tags = Tag::all();
-        return view('posts.create', compact('categories', 'tags'));
+        return response()->json($posts);
     }
 
     public function store(StorePostRequest $request)
@@ -64,11 +59,6 @@ class PostController extends Controller
                 'views' => 0,
                 'published_at' => now(),
             ]);
-
-            if (!$post) {
-                DB::rollBack();
-                return redirect()->route('home')->with('error', 'Failed to create post. Please try again.');
-            }
 
             if (!empty($attributes['new_tags'])) {
                 $tags = explode(',', $attributes['new_tags']);
@@ -98,27 +88,26 @@ class PostController extends Controller
 
             DB::commit();
 
-            return redirect()->route('home')->with('success', 'Post created successfully.');
+            return response()->json(['message' => 'Post created successfully', 'post' => $post], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('home')->with('error', 'An error occurred: ' . $e->getMessage());
+            return response()->json(['error' => 'An error occurred', 'message' => $e->getMessage()], 500);
         }
     }
 
     public function show($slug)
     {
-        $post = Post::where('slug', $slug)->firstOrFail();
+        $post = Post::with(['images', 'category', 'tags'])->where('slug', $slug)->first();
 
-        $post->load('images');
-
-        if (!session()->has('viewed_post_' . $post->id)) {
-            $post->increment('views');
-            session()->put('viewed_post_' . $post->id, true);
+        if (!$post) {
+            return response()->json(['error' => 'Post not found'], 404);
         }
 
-        return view('posts.show', compact('post'));
+        $post->increment('views');
+
+        return response()->json($post);
     }
 
-
 }
+

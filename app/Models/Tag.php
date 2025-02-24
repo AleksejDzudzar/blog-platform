@@ -12,7 +12,7 @@ class Tag extends Model
         'slug',
     ];
 
-    public function post(): BelongsToMany
+    public function posts(): BelongsToMany
     {
         return $this->BelongsToMany(Post::class);
     }

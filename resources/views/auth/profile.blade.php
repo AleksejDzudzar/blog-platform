@@ -46,6 +46,39 @@
                 @endif
             </div>
 
+            <!-- Social Media Links -->
+            <div class="mb-4">
+                <label for="facebook" class="block text-gray-300">Facebook URL</label>
+                <input type="url" name="facebook" id="facebook" class="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-lg" value="{{ old('facebook', $user->facebook) }}">
+                @error('facebook')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div class="mb-4">
+                <label for="twitter" class="block text-gray-300">Twitter URL</label>
+                <input type="url" name="twitter" id="twitter" class="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-lg" value="{{ old('twitter', $user->twitter) }}">
+                @error('twitter')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div class="mb-4">
+                <label for="linkedin" class="block text-gray-300">LinkedIn URL</label>
+                <input type="url" name="linkedin" id="linkedin" class="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-lg" value="{{ old('linkedin', $user->linkedin) }}">
+                @error('linkedin')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div class="mb-4">
+                <label for="instagram" class="block text-gray-300">Instagram URL</label>
+                <input type="url" name="instagram" id="instagram" class="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-lg" value="{{ old('instagram', $user->instagram) }}">
+                @error('instagram')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
+            </div>
+
             <div>
                 <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-300">
                     Save Changes

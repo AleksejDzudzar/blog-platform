@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Models\Tag;
 use App\Models\Post;
-
+use App\Http\Controllers\Controller;
 
 class TagController extends Controller
 {
@@ -13,6 +13,10 @@ class TagController extends Controller
     {
         $posts = $tag->posts()->paginate(10);
 
-        return view('tags.show', compact('posts', 'tag'));
+        return response()->json([
+            'tag' => $tag,
+            'posts' => $posts
+        ]);
     }
 }
+

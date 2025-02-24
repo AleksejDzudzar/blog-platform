@@ -20,7 +20,7 @@ class Post extends Model
         'views',
         'published_at'
         ];
-    protected $dates = ['published_at'];
+    protected $casts = ['published_at'];
 
     public static function boot()
     {
@@ -36,6 +36,10 @@ class Post extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class);
+    }
+    public function images(): HasMany
+    {
+        return $this->hasMany(PostImage::class);
     }
     public function comments(): HasMany
     {

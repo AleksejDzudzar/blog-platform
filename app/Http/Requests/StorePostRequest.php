@@ -22,11 +22,14 @@ class StorePostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required',
-            'slug' => 'required|unique:posts,slug',
-            'content' => 'required',
-            'category_id' => 'required|exists:categories,id',
-            'new_tags' => 'nullable|string',  // Ako se tagovi dodaju, može biti string
+            'title' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', 'unique:posts,slug'],
+            'content' => ['required'],
+            'category_id' => ['required', 'exists:categories,id'],
+            'new_tags' => ['nullable', 'string'],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ];
+
     }
 }

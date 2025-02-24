@@ -19,6 +19,12 @@
 
     <!-- Favicon (ako ga imaš) -->
     <link rel="icon" href="/path-to-favicon.ico" type="image/x-icon">
+
+    <link href="https://cdn.jsdelivr.net/npm/lightbox2@2.11.3/dist/css/lightbox.min.css" rel="stylesheet">
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+
 </head>
 
 <body class="bg-cover bg-center text-white min-h-screen flex flex-col" style="background-image: url('{{ asset('images/background.jpg') }}');">
@@ -31,12 +37,12 @@
             <a href="/" class="flex items-center">
                 <img src="{{ asset('images/logo.png') }}" alt="Moj Blog Logo" class="w-16 h-auto">
             </a>
-            <!-- Navigacioni linkovi -->
-            <div class="space-x-4">
-                <a href="/" class="text-gray-300 hover:text-indigo-600 transition duration-300">Početna</a>
-                <a href="/about" class="text-gray-300 hover:text-indigo-600 transition duration-300">O nama</a>
-                <a href="/contact" class="text-gray-300 hover:text-indigo-600 transition duration-300">Kontakt</a>
-            </div>
+
+            <!-- Search bar -->
+            <form action="{{ route('home') }}" method="GET" class="flex items-center space-x-4">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Pretraži postove..." class="px-4 py-2 border border-gray-700 rounded-l-md bg-gray-800 text-white w-64" />
+                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700">Pretraga</button>
+            </form>
 
             <!-- Avatar i Dropdown -->
             @auth
@@ -77,6 +83,7 @@
     </div>
 </nav>
 
+
 <!-- Glavni sadržaj -->
 <div class="w-full mt-8 px-4 flex-grow">
     <!-- Jedna kolona za sadržaj -->
@@ -95,7 +102,7 @@
     </div>
 </footer>
 
-
+<script src="https://cdn.jsdelivr.net/npm/lightbox2@2.11.3/dist/js/lightbox-plus-jquery.min.js"></script>
 </body>
 
 

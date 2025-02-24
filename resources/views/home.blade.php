@@ -3,6 +3,19 @@
 @section('title', 'Home')
 
 @section('content')
+    <!-- Message dropdown -->
+    @if (session('success'))
+        <div id="success-message" class="alert alert-success bg-green-600 text-white p-4 rounded-md shadow-md mb-4 opacity-100 transition-opacity duration-500" style="display: none;">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div id="error-message" class="alert alert-error bg-red-600 text-white p-4 rounded-md shadow-md mb-4 opacity-100 transition-opacity duration-500" style="display: none;">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <!-- Main section with latest posts -->
     <div class="mb-12">
         <h1 class="text-3xl font-semibold text-white mb-6">Latest Post's</h1>
@@ -82,4 +95,32 @@
             </div>
         </div>
     @endif
+
+    <script>
+        // Show messages when the page is loaded
+        document.addEventListener("DOMContentLoaded", function() {
+            let successMessage = document.getElementById("success-message");
+            let errorMessage = document.getElementById("error-message");
+
+            if (successMessage) {
+                successMessage.style.display = "block";
+                setTimeout(function() {
+                    successMessage.style.opacity = 0;
+                    setTimeout(function() {
+                        successMessage.style.display = "none";
+                    }, 500); // After the fade-out duration
+                }, 5000); // Fade out after 5 seconds
+            }
+
+            if (errorMessage) {
+                errorMessage.style.display = "block";
+                setTimeout(function() {
+                    errorMessage.style.opacity = 0;
+                    setTimeout(function() {
+                        errorMessage.style.display = "none";
+                    }, 500); // After the fade-out duration
+                }, 5000); // Fade out after 5 seconds
+            }
+        });
+    </script>
 @endsection

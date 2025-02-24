@@ -1,25 +1,22 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Http\Controllers\Controller;
 
 class AuthController extends Controller
 {
-    public function showRegisterForm()
-    {
-        return view('auth.register');
-    }
-
+    // Registracija korisnika
     public function register(Request $request)
     {
         $request->validate([
             'name' => 'required',
-            'email' => 'required|email',
-            'password' => 'required',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
         ]);
 
         $user = User::create([
@@ -31,14 +28,14 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect('/');
+        return response()->json([
+            'message' => 'Registration successful',
+            'user' => $user,
+            'token' => $user->createToken('YourAppName')->plainTextToken
+        ], 201);
     }
 
-    public function showLoginForm()
-    {
-        return view('auth.login');
-    }
-
+    // Prijava korisnika
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -47,19 +44,19 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
-            return redirect('/');
+            $user = Auth::user();
+
+            return response()->json([
+                'message' => 'Login successful',
+                'user' => $user,
+                'token' => $user->createToken('YourAppName')->plainTextToken
+            ]);
         }
 
-        return back()->withErrors('Invalid credentials');
+        return response()->json(['error' => 'Invalid credentials'], 401);
     }
 
-    public function editProfile()
-    {
-        return view('auth.profile', [
-            'user' => auth()->user(),
-        ]);
-    }
-
+    // Ažuriranje profila korisnika
     public function updateProfile(Request $request)
     {
         $request->validate([
@@ -88,12 +85,19 @@ class AuthController extends Controller
 
         $user->save();
 
-        return redirect()->route('profile.edit')->with('success', 'Profil uspešno ažuriran!');
+        return response()->json([
+            'message' => 'Profile updated successfully',
+            'user' => $user
+        ]);
     }
 
+    // Odjava korisnika
     public function logout()
     {
-        Auth::logout();
-        return redirect()->route('login')->with('success', 'You have been logged out.');
+        auth()->user()->tokens->each(function ($token) {
+            $token->delete();
+        });
+
+        return response()->json(['message' => 'You have been logged out']);
     }
 }
