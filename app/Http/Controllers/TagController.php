@@ -4,14 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Tag;
-use App\Models\Post;
-
+use App\Services\TagService;
 
 class TagController extends Controller
 {
+    protected TagService $tagService;
+
+    public function __construct(TagService $tagService)
+    {
+        $this->tagService = $tagService;
+    }
+
     public function show(Tag $tag)
     {
-        $posts = $tag->posts()->paginate(10);
+        $posts = $this->tagService->getPostsByTag($tag);
 
         return view('tags.show', compact('posts', 'tag'));
     }

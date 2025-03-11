@@ -2,38 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\UpdateRequest;
+use App\Services\AuthService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 
 class AuthController extends Controller
 {
+    protected AuthService $authService;
+
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
+    }
+
     public function showRegisterForm()
     {
         return view('auth.register');
     }
 
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
-        ], [
-            'email.unique' => 'This email is already registered. Please use another one or log in.'
-        ]);
-
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'avatar' => 'default.jpg',
-        ]);
-
-        Auth::login($user);
-
+        $this->authService->register($request);
         return redirect('/');
     }
 
@@ -42,18 +33,12 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|min:6',
-        ]);
-
-        if (Auth::attempt($credentials)) {
+        if ($this->authService->login($request)) {
             return redirect('/');
         }
-
-        return back()->withErrors('Invalid credentials');
+        return back()->withErrors(['Invalid credentials']);
     }
 
     public function editProfile()
@@ -63,40 +48,15 @@ class AuthController extends Controller
         ]);
     }
 
-    public function updateProfile(Request $request)
+    public function updateProfile(UpdateRequest $request)
     {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|string|email|max:255|unique:users,email,' . auth()->id(),
-            'avatar' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'facebook' => 'nullable|url|max:255',
-            'twitter' => 'nullable|url|max:255',
-            'linkedin' => 'nullable|url|max:255',
-            'instagram' => 'nullable|url|max:255',
-        ]);
-
-        $user = auth()->user();
-        $user->name = $request->name;
-        $user->email = $request->email;
-
-        $user->facebook = $request->facebook;
-        $user->twitter = $request->twitter;
-        $user->linkedin = $request->linkedin;
-        $user->instagram = $request->instagram;
-
-        if ($request->hasFile('avatar')) {
-            $avatarPath = $request->file('avatar')->store('avatars', 'public');
-            $user->avatar = $avatarPath;
-        }
-
-        $user->save();
-
+        $this->authService->updateProfile($request, auth()->user());
         return redirect()->route('profile.edit')->with('success', 'Profile successfully updated!');
     }
 
     public function logout()
     {
-        Auth::logout();
+        $this->authService->logout();
         return redirect()->route('login')->with('success', 'You have been logged out.');
     }
 }
